@@ -13,12 +13,11 @@ __pycache__/
 .ruff_cache/
 *.egg-info/
 
-# Datos del pipeline: los crudos (data/raw/) y las regiones generadas se publican en R2, no en git.
-# Los TIFF de data/raw/ pesan ~250 MB y dos pasan de 50 MB.
+# Datos generados por el pipeline (se publican en R2, no en git). Los crudos de data/raw/ sí se
+# versionan, para construir las regiones sin descargar nada.
 data/regions/
 data/regions-real/
-data/raw/
-data/*.rar
+data/raw/**/*.part
 
 # Entorno
 .env
