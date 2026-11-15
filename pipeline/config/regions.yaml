@@ -5,30 +5,95 @@
 regions:
   jezero:
     name: Cráter Jezero
-    bbox: [77.25, 18.30, 77.60, 18.65]
-    size: 512
+    # Recuadro casi cuadrado más grande donde el mosaico NOAH-H (Wright et al., 2022) tiene clase en
+    # al menos el 95 % de las celdas (95.4 %; HE1). Los huecos de NOAH-H están en los bordes, fuera
+    # de las cuatro imágenes HiRISE clasificadas. Contiene la base, el fin de la demo y los 36 trechos
+    # de Edgar que tienen NOAH-H completo.
+    bbox: [77.316, 18.339, 77.566, 18.590]
+    size: 600 # ~24.8 m por celda de norte a sur y ~23.4 m de este a oeste
     base: { lat: 18.4447, lon: 77.4508 } # sitio de amartizaje de Perseverance
-    dataset_version: 0.2.0
-    # Puntos del escenario de demo para la región sintética. Revisarlos al pasar a datos reales.
+    dataset_version: 0.4.0
+    # Escenario de demo de la región sintética: synthetic.py arma el terreno para estos puntos.
     demo:
       label: Base al frente del delta (escenario sintético)
       start: { lat: 18.4447, lon: 77.4508 }
       end: { lat: 18.4685, lon: 77.3932 }
+    # Escenario de demo con datos reales (marsdata build). Edgar probó ~1,500 destinos: en este, al
+    # sureste, los tres modos toman caminos distintos (HE2) y Segura evita casi todo el riesgo a
+    # cambio de un poco más de O₂.
+    demo_real:
+      label: Base al sureste del delta (Jezero real)
+      start: { lat: 18.4447, lon: 77.4508 }
+      end: { lat: 18.4088, lon: 77.4886 }
     traverses: [perseverance]
+    # Recorrido real (MMGIS de JPL, una LineString por sol) y tabla clase a riesgo de NOAH-H
+    # (Edgar), con rutas desde la raíz del repositorio.
+    traverse_files: { perseverance: M20_traverse_2026-11-12.json }
+    hazard_table: science/validation/noahh_ig_risk.csv
+    # Nombres en la vista 3D (además del inicio y el final del recorrido, que se agregan solos).
+    # `only: synthetic` o `only: real` limita una etiqueta a una de las dos versiones de la región.
+    labels:
+      - { name: "Base · amartizaje de Perseverance", lat: 18.4447, lon: 77.4508, source: base }
+      - { name: "Destino de la demo", lat: 18.4685, lon: 77.3932, source: demo, only: synthetic }
+      - { name: "Destino de la demo: modos distintos", lat: 18.4088, lon: 77.4886, source: demo, only: real }
+      # Destino para marcar a mano en la presentación: la ruta corta sube pendientes y Segura las
+      # rodea con 13-29 % menos O₂ y la mitad de riesgo (análisis de Edgar sobre Jezero real).
+      - { name: "Ahorro de O₂ por pendiente", lat: 18.5223, lon: 77.4289, source: demo, only: real }
     sources:
-      # Rutas locales a los archivos descargados en data/raw/<region>/.
-      # Llenar con los productos reales (ver docs/datos.md).
-      dem: dem_ctx.tif # DEM CTX/HiRISE; respaldo: MOLA MEGDR
-      thermal_inertia: themis_ti.tif
-      minerals: crism_summary.tif
-      ice: swim_ice.tif
-      hazard: hirise_rocks.tif
+      # Rutas locales a los archivos descargados en data/raw/<region>/. Citas en docs/creditos.md.
+      # DEM y ortofoto son del mismo conjunto de navegación de Mars 2020 (USGS, 2020): la ortofoto
+      # se ortorrectificó con ese DTM, así que el relieve y la textura coinciden por construcción.
+      dem: JEZ_ctx_B_soc_008_DTM_MOLAtopography_DeltaGeoid_20m_Eqc_latTs0_lon0.tif # doi:10.5066/P906QQT8
+      ortho: JEZ_ctx_B_soc_008_orthoMosaic_6m_Eqc_latTs0_lon0.tif # doi:10.5066/P9GV1ND3
+      # Recorte de Jezero (con 0.05° de margen) del mosaico cuantitativo de 32 bits, leído por ventana.
+      thermal_inertia: THEMIS_TI_Mosaic_Quant_00N060E_100mpp_jezero.tif
+      # Mosaico IG de NOAH-H (Wright et al., 2022), riesgo con science/validation/noahh_ig_risk.csv.
+      # Se extrae a mano del .zip de la Open University (ver docs/creditos.md). Cubre el 95.4 % del
+      # bbox; el resto es nodata (127).
+      hazard: Jezero_NOAHH_mosaic_IG.tif
+      minerals: crism_summary.tif # producto por definir (CRISM o mapa mineral publicado)
+      ice: swim_ice.tif # verificar antes si SWIM cubre Jezero
+
+  # Zona de caminata: tercer nivel de zoom con HiRISE (DTM de 1 m y ortofoto de 25 cm del conjunto de
+  # navegación de Mars 2020), reducido a ~3 m por celda. Recuadro de ~1.8 km centrado en la base;
+  # moverlo si la caminata de la demo cae en otra parte. HiRISE cubre la base y el final de la demo.
+  jezero_walk:
+    name: Jezero, zona de caminata (HiRISE)
+    bbox: [77.4358, 18.4297, 77.4658, 18.4597]
+    size: 600 # ~2.96 m por celda de norte a sur
+    base: { lat: 18.4447, lon: 77.4508 } # sitio de amartizaje de Perseverance
+    dataset_version: 0.1.0
+    traverses: [perseverance]
+    traverse_files: { perseverance: M20_traverse_2026-11-12.json }
+    hazard_table: science/validation/noahh_ig_risk.csv
+    labels:
+      - { name: "Base · amartizaje de Perseverance", lat: 18.4447, lon: 77.4508, source: base }
+    sources:
+      dem: JEZ_hirise_soc_006_DTM_1m_jezero_walk.tif # doi:10.5066/P9REJ9JN
+      ortho: JEZ_hirise_soc_006_orthoMosaic_25cm_jezero_walk.tif # doi:10.5066/P9QJDP48
+      thermal_inertia: THEMIS_TI_Mosaic_Quant_00N060E_100mpp_jezero_walk.tif
+      hazard: Jezero_NOAHH_mosaic_IG.tif # el mismo mosaico que jezero
 
   gale:
     name: Cráter Gale
-    bbox: [137.20, -4.85, 137.55, -4.50]
-    size: 512
-    base: { lat: -4.5895, lon: 137.4417 } # sitio de amartizaje de Curiosity
+    # Recuadro de 0.25° centrado en Curiosity en el sol 5073 (MMGIS, 14 nov 2026), dentro de la
+    # cobertura del DEM de HiRISE de Gale. Bradbury Landing (el amartizaje) queda 14 km al norte.
+    bbox: [137.264, -4.951, 137.514, -4.701]
+    size: 600 # ~24.7 m por celda de norte a sur y ~24.6 m de este a oeste
+    base: { lat: -4.8260, lon: 137.3889 } # Curiosity en el sol 5073
+    dataset_version: 0.2.0
     traverses: [curiosity]
+    # Recorrido de MMGIS con el sol de cada tramo: python -m marsdata.fetch.mmgis MSL <archivo>.
+    traverse_files: { curiosity: MSL_traverse_2026-11-14.json }
+    # Dentro de una misma conducción, el archivo de Curiosity tiene vértices hasta 59.5 m separados.
+    traverse_max_gap_m: 60
+    labels:
+      - { name: "Base · Curiosity (sol 5073)", lat: -4.8260, lon: 137.3889, source: base }
+    # No hay NOAH-H de Gale: el riesgo sale de la rugosidad del DEM (process/terrain.py), relativa a
+    # la región.
+    hazard_proxy: roughness
     sources:
-      dem: dem_ctx.tif
+      # Recortes por ventana a 5 m de los mosaicos de Calef y Parker (2016).
+      dem: MSL_Gale_DEM_Mosaic_5m_gale.tif
+      ortho: MSL_Gale_Orthophoto_Mosaic_5m_gale.tif
+      thermal_inertia: THEMIS_TI_Mosaic_Quant_30S120E_100mpp_gale.tif
