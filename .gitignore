@@ -1,0 +1,27 @@
+# Node
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Datos del pipeline: los crudos (data/raw/) y las regiones generadas se publican en R2, no en git.
+# Los TIFF de data/raw/ pesan ~250 MB y dos pasan de 50 MB.
+data/regions/
+data/regions-real/
+data/raw/
+data/*.rar
+
+# Entorno
+.env
+.env.local
+
+.claude/
