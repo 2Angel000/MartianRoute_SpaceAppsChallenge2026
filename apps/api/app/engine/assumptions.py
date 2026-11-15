@@ -21,6 +21,7 @@ from app.engine.cost import MIN_CELL_COST, MODE_WEIGHTS
 from app.engine.o2_model import G_MARS_MS2, O2_FLAT_KG_PER_M
 from app.engine.science import ICE_THRESHOLD, MIN_GAP, SCIENCE_THRESHOLD
 from app.geo import MARS_RADIUS_M
+from app.live.sources import SOLAR_ALERT_AFTER_H, SOLAR_ALERT_BEFORE_H
 from app.schemas.assumptions import Assumption, AssumptionsResponse
 from app.schemas.route import Provenance, SuitLimits, WalkMode
 
@@ -49,6 +50,8 @@ LIMITS = [
     "La cifra oficial de O₂ es `o2_interval_kg` (caminata con la curva de Minetti más el trabajo"
     " fijo a la tasa por hora). `o2_estimate_kg` es solo duración × tasa por hora: sirve de"
     " referencia y no se muestra en la interfaz.",
+    "Las llegadas de eyecciones solares a Marte son pronósticos del modelo WSA-ENLIL (DONKI), no"
+    " mediciones. La alerta solo propone activar el escenario de evento solar.",
 ]
 
 
@@ -90,7 +93,9 @@ def build_assumptions() -> AssumptionsResponse:
             value=O2_KG_PER_HOUR,
             unit="kg/h",
             provenance=modeled,
-            source=PENDING_SOURCE,
+            source="Waligora y Horrigan (1975), tabla 2; Weir (1949)",
+            note="Media de las EVA lunares de Apollo 11 a 17 (234 kcal/h): 0.066 a 0.071 kg/h de"
+            " O₂ según el cociente respiratorio (0.7 a 1.0). Medida en la Luna con el traje A7L.",
         ),
         Assumption(
             id="o2_flat_per_m",
@@ -98,8 +103,8 @@ def build_assumptions() -> AssumptionsResponse:
             value=O2_FLAT_KG_PER_M,
             unit="kg/m",
             provenance=modeled,
-            source=PENDING_SOURCE,
-            note="Consumo de O₂ ÷ velocidad en plano: hereda el [__] de esas dos cifras.",
+            source="Derivado: o2_rate ÷ base_speed",
+            note="Consumo de O₂ por hora entre la velocidad en plano; absorbe el efecto del traje.",
         ),
         Assumption(
             id="slope_cost_curve",
@@ -194,7 +199,7 @@ def build_assumptions() -> AssumptionsResponse:
             value=None,
             unit="mSv",
             provenance=modeled,
-            source="NASA-STD-3001 Vol. 1 Rev. B, §4.8",
+            source="NASA-STD-3001 Vol. 1 Rev. C, §4.8",
             note=(
                 "NASA no define un límite por EVA, solo de carrera [V1 4030] y de diseño para un"
                 " evento solar [V1 4031]. La dosis solo genera alerta si se pide un límite."
@@ -206,12 +211,12 @@ def build_assumptions() -> AssumptionsResponse:
             value=CAREER_DOSE_LIMIT_MSV,
             unit="mSv",
             provenance=observed,
-            source="NASA-STD-3001 Vol. 1 Rev. B, [V1 4030]",
+            source="NASA-STD-3001 Vol. 1 Rev. C, [V1 4030]",
             note="Menor a 600 mSv para cualquier edad y sexo; incluye todas las misiones.",
         ),
         Assumption(
             id="radiation_rate",
-            label="Dosis equivalente en la superficie",
+            label="Dosis equivalente en la superficie de Gale",
             value=RAD_MSV_PER_DAY,
             unit="mSv/día",
             provenance=observed,
@@ -226,6 +231,23 @@ def build_assumptions() -> AssumptionsResponse:
             provenance=observed,
             source="NASA JPL (2024)",
             note="Curiosity RAD, 20 de mayo de 2024. Se aplica completa como peor caso.",
+        ),
+        Assumption(
+            id="solar_alert_before",
+            label="Inicio de la alerta antes de que una eyección solar llegue a Marte",
+            value=SOLAR_ALERT_BEFORE_H,
+            unit="h",
+            provenance=modeled,
+            source=PROJECT_DECISION,
+            note="La llegada la pronostica el modelo WSA-ENLIL de DONKI (CCMC de NASA), en vivo.",
+        ),
+        Assumption(
+            id="solar_alert_after",
+            label="Fin de la alerta después de la llegada",
+            value=SOLAR_ALERT_AFTER_H,
+            unit="h",
+            provenance=modeled,
+            source=PROJECT_DECISION,
         ),
         Assumption(
             id="sol_length",
