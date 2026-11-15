@@ -1,0 +1,156 @@
+:root {
+  --bg: #0b0605;
+  --panel: rgba(20, 12, 10, 0.82);
+  --border: rgba(255, 140, 90, 0.25);
+  --text: #f3e6df;
+  --muted: #b39a8e;
+  --accent: #ff7a45;
+  --safe: #4fd1a5;
+  --fast: #ffc94d;
+  --science: #6aa8ff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+main {
+  position: fixed;
+  inset: 0;
+}
+
+.panel {
+  position: absolute;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 14px;
+  backdrop-filter: blur(6px);
+  max-width: min(320px, calc(100vw - 32px));
+}
+
+.panel h2 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.panel button {
+  background: var(--accent);
+  color: #1a0d08;
+  border: 0;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.panel button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.panel button.ghost {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.panel ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.error {
+  color: #ff8a80;
+}
+
+/* Tabla comparativa de rutas */
+.compare {
+  width: 100%;
+  margin-top: 10px;
+  font-size: 12px;
+  border-collapse: collapse;
+}
+
+.compare th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: help;
+}
+
+.compare td,
+.compare th {
+  padding: 3px 4px;
+  vertical-align: top;
+}
+
+.compare caption {
+  caption-side: bottom;
+  text-align: left;
+  font-size: 11px;
+  padding-top: 6px;
+}
+
+/* Panel de supuestos: largo, así que se desplaza por dentro sin tapar el panel de rutas */
+.assumptions .scroll {
+  max-height: 30vh;
+  overflow-y: auto;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.assumptions li {
+  margin-bottom: 6px;
+}
+
+.tag {
+  font-size: 10px;
+  padding: 0 5px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.tag.observed {
+  color: var(--safe);
+}
+
+.tag.derived {
+  color: var(--science);
+}
+
+.tag.modeled {
+  color: var(--fast);
+}
+
+/* Leyenda del mapa de regreso seguro */
+.legend {
+  list-style: none;
+  padding-left: 0 !important;
+  font-size: 12px;
+}
+
+.swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  vertical-align: middle;
+}
